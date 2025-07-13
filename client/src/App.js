@@ -55,10 +55,10 @@ function MapClickEventHandler({ setLatitude, setLongitude, setMarkerPosition, se
 }
 
 function App() {
-  const [latitude, setLatitude] = useState('40.7128');
-  const [longitude, setLongitude] = useState('-74.0060');
-  const [date1, setDate1] = useState('2024-05-01');
-  const [date2, setDate2] = useState('2025-05-25');
+  const [latitude, setLatitude] = useState('35.585049');
+  const [longitude, setLongitude] = useState('-82.567277');
+  const [date1, setDate1] = useState('2024-09-16');
+  const [date2, setDate2] = useState('2024-10-12');
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -66,6 +66,8 @@ function App() {
   
   const [image1Info, setImage1Info] = useState(null);
   const [image2Info, setImage2Info] = useState(null);
+
+  const [isImage1Visible, setIsImage1Visible] = useState(true);
 
   const [mapCenter, setMapCenter] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
@@ -238,6 +240,9 @@ function App() {
           <div className="image-dates-display">
             <p>Image 1 acquired: {new Date(image1Info.dateAcquired).toLocaleDateString()}</p>
             <p>Image 2 acquired: {new Date(image2Info.dateAcquired).toLocaleDateString()}</p>
+            <button onClick={() => setIsImage1Visible(!isImage1Visible)} className="toggle-button">
+                {isImage1Visible ? 'Hide Image 1' : 'Show Image 1'}
+          </button>
           </div>
         )}
       </div>
@@ -249,14 +254,13 @@ function App() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           
-          {/* --- MODIFIED: Use TileLayer instead of GeotiffOverlay --- */}
-          {image1Info && (
+          {image1Info && isImage1Visible && (
             <TileLayer
               url={image1Info.tileUrlTemplate} // Use the template from the backend
               bounds={image1Info.bounds}
               opacity={1}
               tms={false} // Important: Standard web maps use TMS=false
-              zIndex={2} // Ensure it's on top of the base map
+              zIndex={3} // Ensure it's on top of the second image
             />
           )}
 
@@ -264,9 +268,9 @@ function App() {
             <TileLayer
               url={image2Info.tileUrlTemplate} // Use the template from the backend
               bounds={image2Info.bounds}
-              opacity={0.6} // Make second image semi-transparent
+              opacity={1} // Make second image semi-transparent
               tms={false}
-              zIndex={3} // Ensure it's on top of the first image
+              zIndex={2}
             />
           )}
 
