@@ -55,8 +55,8 @@ function MapClickEventHandler({ setLatitude, setLongitude, setMarkerPosition, se
 }
 
 function App() {
-  const [latitude, setLatitude] = useState('35.585049');
-  const [longitude, setLongitude] = useState('-82.567277');
+  const [latitude, setLatitude] = useState('35.4393');
+  const [longitude, setLongitude] = useState('-82.2465');
   const [date1, setDate1] = useState('2024-09-16');
   const [date2, setDate2] = useState('2024-10-12');
 
@@ -248,17 +248,17 @@ function App() {
       </div>
 
       <div className="map-view-container">
-        <MapContainer className="leaflet-map" center={[40.7128, -74.0060]} zoom={10} scrollWheelZoom={true}>
+        <MapContainer className="leaflet-map" center={[35.4393, -82.2465]} zoom={10} scrollWheelZoom={true}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           
-          {image1Info && isImage1Visible && (
+          {image1Info && (
             <TileLayer
               url={image1Info.tileUrlTemplate} // Use the template from the backend
               bounds={image1Info.bounds}
-              opacity={1}
+              opacity={isImage1Visible ? 1 : 0}
               tms={false} // Important: Standard web maps use TMS=false
               zIndex={3} // Ensure it's on top of the second image
             />

@@ -65,9 +65,7 @@ def fetch_stac_feature(lat, lon, date_str, cloud_cover_lt=10, date_window_days=1
 
     return stac_response["features"][0]
 
-# --- MODIFIED API Response structure to send a tile URL template ---
 class ImageInfo:
-    # We now send a tileUrlTemplate instead of the raw imageUrl
     def __init__(self, tile_url_template, bounds, date_acquired):
         self.tileUrlTemplate = tile_url_template
         self.bounds = bounds
@@ -80,7 +78,6 @@ class ImageInfo:
             "dateAcquired": self.date_acquired
         }
 
-# --- NEW: Tile Server Endpoint ---
 @app.route("/api/tiles/<int:z>/<int:x>/<int:y>", methods=["GET"])
 def tile_server(z, x, y):
     """
@@ -93,16 +90,11 @@ def tile_server(z, x, y):
 
     try:
         with COGReader(cog_url) as cog:
-            # FIX: Instead of asset="visual", specify the RGB bands directly using 'indexes'.
             # The 'visual' GeoTIFF is a simple RGB image, so we use bands 1, 2, and 3.
             tile_data, tile_mask = cog.tile(x, y, z, tilesize=256, indexes=(1, 2, 3))
 
         # Create an ImageData object from the tile data
         img = ImageData(tile_data, tile_mask)
-
-        # OPTIONAL BUT RECOMMENDED: Apply color correction for better contrast.
-        # This scales the raw pixel values to a display-friendly 0-255 range.
-        # img.rescale(in_range=((0, 4000),), out_range=((0, 255),))
         
         # The tile is returned as a PNG image
         return Response(img.render(img_format="PNG"), mimetype="image/png")
