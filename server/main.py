@@ -113,6 +113,7 @@ def get_change_detection_handler():
     lon_str = request.args.get("lon")
     date1_str = request.args.get("date1")
     date2_str = request.args.get("date2")
+    cloud_cover_str = request.args.get("cloudCover")
 
     if not all([lat_str, lon_str, date1_str, date2_str]):
         return jsonify({"error": "Missing required query parameters"}), 400
@@ -122,14 +123,23 @@ def get_change_detection_handler():
         lon = float(lon_str)
     except ValueError:
         return jsonify({"error": "Invalid coordinates"}), 400
+    
+    cloud_cover = 20 # Default value
+    if cloud_cover_str:
+        try:
+            cloud_cover = int(cloud_cover_str)
+            if not (1 <= cloud_cover <= 100):
+                return jsonify({"error": "Cloud cover must be a number between 1 and 100"}), 400
+        except ValueError:
+            return jsonify({"error": "Invalid cloud cover value"}), 400
 
-    feature1 = fetch_stac_feature(lat, lon, date1_str)
+    feature1 = fetch_stac_feature(lat, lon, date1_str, cloud_cover_lt=cloud_cover)
     if not feature1:
-        return jsonify({"error": f"No clear image found for Date 1 ({date1_str})."}), 404
+        return jsonify({"error": f"No clear image found for Date 1 ({date1_str}) with cloud cover less than {cloud_cover}%."}), 404
 
-    feature2 = fetch_stac_feature(lat, lon, date2_str)
+    feature2 = fetch_stac_feature(lat, lon, date2_str, cloud_cover_lt=cloud_cover)
     if not feature2:
-        return jsonify({"error": f"No clear image found for Date 2 ({date2_str})."}), 404
+        return jsonify({"error": f"No clear image found for Date 2 ({date2_str}) with cloud cover less than {cloud_cover}%."}), 404
 
     # Get the URL of the 'visual' asset (the TCI GeoTIFF)
     cog_url1 = feature1.get("assets", {}).get("visual", {}).get("href")

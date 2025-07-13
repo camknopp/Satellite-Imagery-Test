@@ -59,6 +59,7 @@ function App() {
   const [longitude, setLongitude] = useState('-82.2465');
   const [date1, setDate1] = useState('2024-09-16');
   const [date2, setDate2] = useState('2024-10-12');
+  const [cloudCover, setCloudCover] = useState(20); // New state for cloud cover
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -115,6 +116,10 @@ function App() {
     }
   }
 
+  const handleCloudCoverChange = (event) => {
+    setCloudCover(parseInt(event.target.value, 10));
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     
@@ -148,7 +153,7 @@ function App() {
     setImage2Info(null);
 
     try {
-      const apiUrl = `http://localhost:8080/api/change-detection?lat=${latitude}&lon=${longitude}&date1=${date1}&date2=${date2}`;
+      const apiUrl = `http://localhost:8080/api/change-detection?lat=${latitude}&lon=${longitude}&date1=${date1}&date2=${date2}&cloudCover=${cloudCover}`;
       const response = await fetch(apiUrl);
 
       if (!response.ok) {
@@ -226,6 +231,18 @@ function App() {
             <label htmlFor="date2">Image Date 2</label>
             <input id="date2" type="date" value={date2} onChange={handleDate2Change} />
             {errors.date2 && <p className="error-text">{errors.date2}</p>}
+          </div>
+
+          <div className="input-group">
+            <label htmlFor="cloudCover">Max Cloud Cover: {cloudCover}%</label>
+            <input 
+              id="cloudCover" 
+              type="range" 
+              min="1" 
+              max="100" 
+              value={cloudCover} 
+              onChange={handleCloudCoverChange} 
+            />
           </div>
 
           <button type="submit" disabled={isLoading}>
