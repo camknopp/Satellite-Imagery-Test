@@ -178,3 +178,47 @@ button:disabled {
 .toggle-button:hover {
   background-color: #0056b3;
 }
+
+.computation-section {
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.computation-title {
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  color: var(--color-gray-800);
+  margin-bottom: var(--spacing-3);
+}
+
+.computation-description {
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-4);
+}
+
+.computation-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2); /* Simulates space-y-2 */
+}
+
+.computation-option {
+  display: flex;
+  align-items: center;
+  color: var(--color-gray-700);
+  cursor: pointer;
+}
+
+.results-note {
+  font-style: italic;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+li {
+  margin: 10px;
+}

@@ -72,7 +72,39 @@ function App() {
 
   const [mapCenter, setMapCenter] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
-  
+
+  const [selectedComputations, setSelectedComputations] = useState([]);
+  const [computationResults, setComputationResults] = useState({});
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [showCalculationResults, setShowCalculationResults] = useState(false);
+
+  // Available computation types
+  const computationCategories = {
+    "Disaster Response & Monitoring": [
+      'Differenced Normalized Burn Ratio (dNBR)',
+      'Normalized Difference Flood Index (NDFI)',
+      'Building Damage Proxy Map (Simulated)',
+      'Landslide Susceptibility Index (Simulated)'
+    ],
+    "Agriculture & Forestry": [
+      'NDVI (Normalized Difference Vegetation Index)',
+      'EVI (Enhanced Vegetation Index)',
+      'NDMI (Normalized Difference Moisture Index)',
+      'Chlorophyll Index (Simulated)'
+    ],
+    "Water Resources": [
+      'NDWI (Normalized Difference Water Index - Surface Water)',
+      'Modified Normalized Difference Water Index (MNDWI)',
+      'Turbidity/Sedimentation Index (Simulated)'
+    ],
+    "Urban & Land Use Change": [
+      'Normalized Difference Built-up Index (NDBI)',
+      'Impervious Surface Change Detection (Simulated)',
+      'Urban Heat Island (LST Difference - Simulated)',
+      'Green Space Monitoring (Simulated)'
+    ]
+  };
+
   useEffect(() => {
     const latNum = parseFloat(latitude);
     const lonNum = parseFloat(longitude);
@@ -144,6 +176,7 @@ function App() {
       setApiError('');
       setMapCenter(null);
       setMarkerPosition(null);
+      setShowCalculationResults(false); // Hide calculation results on new image search
       return;
     }
 
@@ -152,6 +185,7 @@ function App() {
     setApiError('');
     setImage1Info(null); // Clear existing images on new search
     setImage2Info(null);
+    setShowCalculationResults(false); // Hide calculation results on new image search
 
     try {
       const apiUrl = `http://localhost:8080/api/change-detection?lat=${latitude}&lon=${longitude}&date1=${date1}&date2=${date2}&cloudCover=${cloudCover}`;
@@ -193,6 +227,93 @@ function App() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCategoryCheckboxChange = (category, event) => {
+    const { checked } = event.target;
+    const computationsInCategory = computationCategories[category];
+
+    if (checked) {
+      // Add all computations from this category that are not already selected
+      setSelectedComputations(prev => [...new Set([...prev, ...computationsInCategory])]);
+    } else {
+      // Remove all computations from this category
+      setSelectedComputations(prev => prev.filter(comp => !computationsInCategory.includes(comp)));
+    }
+    setShowCalculationResults(false); // Hide previous results when selection changes
+  };
+
+  const handleComputationChange = (event) => {
+    const { value, checked } = event.target;
+    setSelectedComputations(prev =>
+      checked ? [...prev, value] : prev.filter(comp => comp !== value)
+    );
+    setShowCalculationResults(false); // Hide previous results when selection changes
+  };
+
+  // --- Simulate Computation Handler ---
+  const handleCalculate = () => {
+    setIsCalculating(true);
+    setComputationResults({}); // Clear previous results
+
+    // Simulate a delay for "computation"
+    setTimeout(() => {
+      const results = {};
+      selectedComputations.forEach(comp => {
+      selectedComputations.forEach(comp => {
+        // Disaster Response & Monitoring
+        if (comp.includes('dNBR')) {
+          results.dNBR = (Math.random() * 1.5 - 0.5).toFixed(4); // -0.5 to 1.0, higher positive = more severe burn
+        } else if (comp.includes('NDFI')) {
+          results.NDFI = (Math.random() * 0.8 + 0.1).toFixed(4); // 0.1 to 0.9, higher = more water
+        } else if (comp.includes('Building Damage Proxy Map')) {
+          results.buildingDamage = `Estimated ${Math.floor(Math.random() * 20) + 5}% structural damage detected.`; // 5-25%
+        } else if (comp.includes('Landslide Susceptibility Index')) {
+            const susceptibility = Math.random();
+            if (susceptibility < 0.3) results.landslideSusceptibility = 'Low';
+            else if (susceptibility < 0.7) results.landslideSusceptibility = 'Medium';
+            else results.landslideSusceptibility = 'High';
+        }
+
+        // Agriculture & Forestry
+        else if (comp.includes('NDVI')) {
+          results.NDVI = (Math.random() * 2 - 1).toFixed(4); // -1 to 1
+        } else if (comp.includes('EVI')) {
+          results.EVI = (Math.random() * 0.8 + 0.1).toFixed(4); // 0.1 to 0.9
+        } else if (comp.includes('NDMI')) {
+          results.NDMI = (Math.random() * 1.5 - 0.5).toFixed(4); // -0.5 to 1.0, higher = more moisture
+        } else if (comp.includes('Chlorophyll Index')) {
+            results.ChlorophyllIndex = (Math.random() * 0.5 + 0.2).toFixed(4); // 0.2 to 0.7
+        }
+
+        // Water Resources
+        else if (comp.includes('NDWI (Normalized Difference Water Index - Surface Water)')) {
+          results.NDWI_Surface = (Math.random() * 1.5 - 0.5).toFixed(4); // -0.5 to 1.0, positive = water
+        } else if (comp.includes('MNDWI')) {
+          results.MNDWI = (Math.random() * 1.5 - 0.5).toFixed(4); // -0.5 to 1.0, similar to NDWI but improved
+        } else if (comp.includes('Turbidity/Sedimentation Index')) {
+          results.Turbidity = (Math.random() * 0.4 + 0.05).toFixed(4); // 0.05 to 0.45, higher = more turbid
+        }
+
+        // Urban & Land Use Change
+        else if (comp.includes('NDBI')) {
+          results.NDBI = (Math.random() * 1.2 - 0.6).toFixed(4); // -0.6 to 0.6, higher positive = built-up
+        } else if (comp.includes('Impervious Surface Change Detection')) {
+          const change = (Math.random() * 20 - 10).toFixed(2); // Simulate change from -10% to +10%
+          results.imperviousChange = `${Math.abs(change)}% ${change > 0 ? 'Increase' : 'Decrease'} in impervious surface`;
+        } else if (comp.includes('Urban Heat Island')) {
+          const tempDiff = (Math.random() * 5 + 1).toFixed(2); // Simulate 1-6 degrees difference
+          results.urbanHeatIsland = `${tempDiff}°C hotter in urban core (Simulated)`;
+        } else if (comp.includes('Green Space Monitoring')) {
+          const greenChange = (Math.random() * 15 - 7).toFixed(2); // Simulate change from -7% to +8%
+          results.greenSpaceChange = `${Math.abs(greenChange)}% ${greenChange > 0 ? 'Increase' : 'Decrease'} in green space cover`;
+        }
+      });
+    });
+      setComputationResults(results);
+      setIsCalculating(false);
+      setShowCalculationResults(true); // Show results after calculation
+    }, 1500); // Simulate 1.5 seconds of "computation"
   };
 
   // --- Use useMemo to stabilize bounds and center props for MapUpdater ---
@@ -250,9 +371,9 @@ function App() {
             {isLoading ? 'Searching...' : 'Find Images'}
           </button>
           
-          <div className="api-status">
+          {apiError && <div className="api-status">
             {apiError && <p className="error-text api-error">{apiError}</p>}
-          </div>
+          </div>}
         </form>
         {image1Info && image2Info && (
           <div className="image-dates-display">
@@ -260,7 +381,110 @@ function App() {
             <p>Image 2 acquired: {new Date(image2Info.dateAcquired).toLocaleDateString()}</p>
             <button onClick={() => setIsImage1Visible(!isImage1Visible)} className="toggle-button">
                 {isImage1Visible ? 'Hide Image 1' : 'Show Image 1'}
-          </button>
+            </button>
+            {/* Computation Options Section */}
+            <div className="computation-section">
+              <h2 className="computation-title">Select Computations</h2>
+              <p className="subtitle">Choose which geospatial computations you'd like to perform on the selected area. (Note: These are simulated results for demonstration purposes.)</p>
+              {Object.entries(computationCategories).map(([category, computations]) => (
+                <div key={category} className="computation-category">
+                  <h3>
+                    <span className="checkbox-label">{category}</span>
+                    <input
+                      type="checkbox"
+                      checked={computations.every(comp => selectedComputations.includes(comp))}
+                      onChange={(e) => handleCategoryCheckboxChange(category, e)}
+                      className="checkbox-input"
+                    />
+                  </h3>
+                  <div className="input-group">
+                    {computations.map(option => (
+                      <label key={option} className="computation-option">
+                        <input
+                          type="checkbox"
+                          value={option}
+                          checked={selectedComputations.includes(option)}
+                          onChange={handleComputationChange}
+                          className="checkbox-input"
+                        />
+                        <span className="checkbox-label">{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <button
+                type='submit'
+                onClick={handleCalculate}
+                disabled={selectedComputations.length === 0 || isCalculating}
+              >
+                {isCalculating ? 'Calculating...' : 'Calculate Selected'}
+              </button>
+
+              {/* Computation Results Display */}
+              {showCalculationResults && Object.keys(computationResults).length > 0 && (
+                <div className="computation-results">
+                  <h3 className="results-title">Computation Results:</h3>
+                  <ul className="results-list">
+                  {/* Disaster Response & Monitoring */}
+                  {computationResults.dNBR && (
+                    <li><span className="font-bold">dNBR (Differenced Normalized Burn Ratio):</span> {computationResults.dNBR} (Higher positive values indicate more severe burn)</li>
+                  )}
+                  {computationResults.NDFI && (
+                    <li><span className="font-bold">NDFI (Normalized Difference Flood Index):</span> {computationResults.NDFI} (Higher values indicate presence of water)</li>
+                  )}
+                  {computationResults.buildingDamage && (
+                    <li><span className="font-bold">Building Damage Proxy Map:</span> {computationResults.buildingDamage}</li>
+                  )}
+                  {computationResults.landslideSusceptibility && (
+                      <li><span className="font-bold">Landslide Susceptibility Index:</span> {computationResults.landslideSusceptibility}</li>
+                  )}
+
+                  {/* Agriculture & Forestry */}
+                  {computationResults.NDVI && (
+                    <li><span className="font-bold">NDVI (Normalized Difference Vegetation Index):</span> {computationResults.NDVI} (Higher values indicate denser vegetation)</li>
+                  )}
+                  {computationResults.EVI && (
+                    <li><span className="font-bold">EVI (Enhanced Vegetation Index):</span> {computationResults.EVI} (Improved vegetation indicator, especially in dense areas)</li>
+                  )}
+                  {computationResults.NDMI && (
+                    <li><span className="font-bold">NDMI (Normalized Difference Moisture Index):</span> {computationResults.NDMI} (Indicates vegetation water content)</li>
+                  )}
+                  {computationResults.ChlorophyllIndex && (
+                      <li><span className="font-bold">Chlorophyll Index:</span> {computationResults.ChlorophyllIndex} (Indicates chlorophyll content, related to plant health)</li>
+                  )}
+
+                  {/* Water Resources */}
+                  {computationResults.NDWI_Surface && (
+                    <li><span className="font-bold">NDWI (Normalized Difference Water Index - Surface Water):</span> {computationResults.NDWI_Surface} (Highlights open water bodies)</li>
+                  )}
+                  {computationResults.MNDWI && (
+                    <li><span className="font-bold">MNDWI (Modified Normalized Difference Water Index):</span> {computationResults.MNDWI} (Enhanced water body detection)</li>
+                  )}
+                  {computationResults.Turbidity && (
+                    <li><span className="font-bold">Turbidity/Sedimentation Index:</span> {computationResults.Turbidity} (Indicates water clarity/sediment load)</li>
+                  )}
+
+                  {/* Urban & Land Use Change */}
+                  {computationResults.NDBI && (
+                    <li><span className="font-bold">NDBI (Normalized Difference Built-up Index):</span> {computationResults.NDBI} (Higher values indicate built-up areas)</li>
+                  )}
+                  {computationResults.imperviousChange && (
+                    <li><span className="font-bold">Impervious Surface Change Detection:</span> {computationResults.imperviousChange}</li>
+                  )}
+                  {computationResults.urbanHeatIsland && (
+                    <li><span className="font-bold">Urban Heat Island (LST Difference):</span> {computationResults.urbanHeatIsland}</li>
+                  )}
+                  {computationResults.greenSpaceChange && (
+                    <li><span className="font-bold">Green Space Monitoring:</span> {computationResults.greenSpaceChange}</li>
+                  )}
+                  </ul>
+                  <p className="results-note">
+                    These values are simulated and for demonstration purposes only. Actual computations would involve complex image processing.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
