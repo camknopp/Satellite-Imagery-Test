@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'; // Import useMemo
+import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, useMap, useMapEvents, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -72,7 +72,7 @@ function App() {
 
   const [mapCenter, setMapCenter] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
-
+  
   useEffect(() => {
     const latNum = parseFloat(latitude);
     const lonNum = parseFloat(longitude);
@@ -147,6 +147,7 @@ function App() {
       return;
     }
 
+    setIsImage1Visible(true);
     setIsLoading(true);
     setApiError('');
     setImage1Info(null); // Clear existing images on new search
@@ -278,6 +279,8 @@ function App() {
               opacity={isImage1Visible ? 1 : 0}
               tms={false} // Important: Standard web maps use TMS=false
               zIndex={3} // Ensure it's on top of the second image
+              noWrap={true}
+              keepBuffer={5}
             />
           )}
 
@@ -285,9 +288,11 @@ function App() {
             <TileLayer
               url={image2Info.tileUrlTemplate} // Use the template from the backend
               bounds={image2Info.bounds}
-              opacity={1} // Make second image semi-transparent
+              opacity={1}
               tms={false}
               zIndex={2}
+              noWrap={true}
+              keepBuffer={5}
             />
           )}
 
