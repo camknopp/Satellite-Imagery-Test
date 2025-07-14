@@ -229,6 +229,25 @@ function App() {
     }
   };
 
+  const handleClearAndReset = () => {
+    // Clear images and related states
+    setImage1Info(null);
+    setImage2Info(null);
+    setIsImage1Visible(true); // Reset visibility to default
+
+    // Clear errors and API messages
+    setErrors({});
+    setApiError('');
+    setIsLoading(false);
+
+    // Clear computation selections and results
+    setSelectedComputations([]);
+    setComputationResults({});
+    setIsCalculating(false);
+    setShowCalculationResults(false);
+  };
+
+
   const handleCategoryCheckboxChange = (category, event) => {
     const { checked } = event.target;
     const computationsInCategory = computationCategories[category];
@@ -370,6 +389,11 @@ function App() {
           <button type="submit" disabled={isLoading}>
             {isLoading ? 'Searching...' : 'Find Images'}
           </button>
+
+          {image1Info && image2Info && 
+          <button type="button" className='reset-button' onClick={handleClearAndReset}>
+            Reset
+          </button>}
           
           {apiError && <div className="api-status">
             {apiError && <p className="error-text api-error">{apiError}</p>}
