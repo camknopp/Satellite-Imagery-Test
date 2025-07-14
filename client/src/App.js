@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, useMap, useMapEvents, Marker, Popup } from 're
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
+import logo from './logo.png';
 
 // Fix for default marker icon issue in Webpack
 delete L.Icon.Default.prototype._getIconUrl;
@@ -347,7 +348,7 @@ function App() {
   return (
     <div className="app-container">
       <div className="form-container">
-        <h1>Geospatial Image Finder</h1>
+        <img src={logo} alt="Geo Compare Logo" className="app-logo" />
         <p className="subtitle">Enter coordinates and two dates to find satellite images for comparison.</p>
         <form onSubmit={handleSubmit} noValidate>
           <div className="input-group">

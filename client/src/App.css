@@ -115,6 +115,20 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.reset-button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: grey;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  background-color: red;
+}
+
 /* --- Status & Error Messages --- */
 .error-text {
   color: var(--error-color);
@@ -173,6 +187,9 @@ button:disabled {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .toggle-button:hover {
@@ -190,20 +207,6 @@ button:disabled {
 }
 
 .toggle-button:hover {
-  background-color: #0056b3;
-}
-
-.reset-button {
-  margin-top: 10px;
-  padding: 8px 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.reset-button:hover {
   background-color: #0056b3;
 }
 
@@ -249,4 +252,11 @@ button:disabled {
 
 li {
   margin: 10px;
+}
+
+.app-logo {
+  width: 50%;
+  display: block;
+  margin-left: auto; 
+  margin-right: auto;
 }
