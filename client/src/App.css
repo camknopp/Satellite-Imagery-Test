@@ -106,14 +106,33 @@ button[type="submit"] {
   margin-top: 1rem;
 }
 
-button:hover:not(:disabled) {
+button[type="submit"]:hover:not(:disabled) {
   background-color: var(--primary-hover);
 }
 
-button:disabled {
+button[type="submit"]:disabled {
   background-color: #a0c7ff;
   cursor: not-allowed;
 }
+
+.export-csv-button {
+  padding: 0.8rem 1rem;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+};
+
+.calculate-button {
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+};
 
 .reset-button {
   margin-top: 10px;
@@ -126,7 +145,8 @@ button:disabled {
 }
 
 .reset-button:hover {
-  background-color: red;
+  cursor: pointer;
+  background-color: darkgrey;
 }
 
 /* --- Status & Error Messages --- */

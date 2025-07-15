@@ -27,7 +27,7 @@ function MapUpdater({ bounds, center }) {
       }
     }, 100);
     return () => clearTimeout(timer);
-  }, [bounds, center, map]); // These dependencies should now be stable references
+  }, [bounds, center, map]);
   return null;
 }
 
@@ -177,16 +177,16 @@ function App() {
       setApiError('');
       setMapCenter(null);
       setMarkerPosition(null);
-      setShowCalculationResults(false); // Hide calculation results on new image search
+      setShowCalculationResults(false);
       return;
     }
 
     setIsImage1Visible(true);
     setIsLoading(true);
     setApiError('');
-    setImage1Info(null); // Clear existing images on new search
+    setImage1Info(null);
     setImage2Info(null);
-    setShowCalculationResults(false); // Hide calculation results on new image search
+    setShowCalculationResults(false);
 
     try {
       const apiUrl = `http://localhost:8080/api/change-detection?lat=${latitude}&lon=${longitude}&date1=${date1}&date2=${date2}&cloudCover=${cloudCover}`;
@@ -336,6 +336,103 @@ function App() {
     }, 1500); // Simulate 1.5 seconds of "computation"
   };
 
+  const handleExportToCSV = () => {
+    if (Object.keys(computationResults).length === 0) {
+      alert("No computation results to export.");
+      return;
+    }
+
+    // Prepare header row for CSV, including new data points
+    const headers = [
+      "Latitude",
+      "Longitude",
+      "Image Date 1 (Input)",
+      "Image Date 2 (Input)",
+      "Max Cloud Cover (Input)",
+      "Image 1 Acquired Date",
+      "Image 2 Acquired Date",
+      "Computation",
+      "Result"
+    ];
+
+    let csvContent = headers.map(header => `"${header}"`).join(",") + "\n"; // Enclose headers in quotes
+
+    // Data rows
+    // Get general info once
+    const commonData = {
+      latitude: latitude,
+      longitude: longitude,
+      date1: date1,
+      date2: date2,
+      cloudCover: cloudCover,
+      image1Acquired: image1Info ? new Date(image1Info.dateAcquired).toLocaleDateString() : 'N/A',
+      image2Acquired: image2Info ? new Date(image2Info.dateAcquired).toLocaleDateString() : 'N/A',
+    };
+
+    if (Object.keys(computationResults).length > 0) {
+      for (const key in computationResults) {
+        if (Object.hasOwnProperty.call(computationResults, key)) {
+          let value = computationResults[key];
+          // Ensure values with commas are quoted
+          if (typeof value === 'string' && value.includes(',')) {
+            value = `"${value.replace(/"/g, '""')}"`; // Replace double quotes with two double quotes, then enclose
+          } else {
+            value = `"${value}"`; // Quote all values for consistency and to handle numbers as strings
+          }
+
+          const row = [
+            `"${commonData.latitude}"`,
+            `"${commonData.longitude}"`,
+            `"${commonData.date1}"`,
+            `"${commonData.date2}"`,
+            `"${commonData.cloudCover}%"`,
+            `"${commonData.image1Acquired}"`,
+            `"${commonData.image2Acquired}"`,
+            `"${key}"`, // Computation name
+            value // Computation result
+          ];
+          csvContent += row.join(",") + "\n";
+        }
+      }
+    } else {
+      // If no computations are selected/calculated, still export basic info
+      const row = [
+        `"${commonData.latitude}"`,
+        `"${commonData.longitude}"`,
+        `"${commonData.date1}"`,
+        `"${commonData.date2}"`,
+        `"${commonData.cloudCover}%"`,
+        `"${commonData.image1Acquired}"`,
+        `"${commonData.image2Acquired}"`,
+        `"No Computations Selected"`,
+        `"N/A"`
+      ];
+      csvContent += row.join(",") + "\n";
+    }
+
+
+    // Create a Blob object with the CSV content
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    // Create a link element
+    const link = document.createElement('a');
+    if (link.download !== undefined) { // Feature detection for download attribute
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `geo_compare_results_${latitude}_${longitude}_${date1}_${date2}.csv`); // More descriptive filename
+      link.style.visibility = 'hidden'; // Hide the link
+      document.body.appendChild(link); // Append to DOM for click
+      link.click(); // Programmatically click the link to trigger download
+      document.body.removeChild(link); // Clean up
+      URL.revokeObjectURL(url); // Release the object URL
+    } else {
+      // Fallback for browsers that don't support the download attribute
+      alert("Your browser does not support downloading files directly. Please copy the content manually.");
+      // Optionally, you could display the CSV content in a textarea for manual copy
+      console.log(csvContent);
+    }
+  };
+
   // --- Use useMemo to stabilize bounds and center props for MapUpdater ---
   const mapUpdaterBounds = useMemo(() => {
     if (image1Info?.bounds) return image1Info.bounds;
@@ -392,7 +489,7 @@ function App() {
           </button>
 
           {image1Info && image2Info && 
-          <button type="button" className='reset-button' onClick={handleClearAndReset}>
+          <button className='reset-button' onClick={handleClearAndReset}>
             Reset
           </button>}
           
@@ -439,10 +536,11 @@ function App() {
                 </div>
               ))}
               <button
+                className='calculate-button'
                 type='submit'
                 onClick={handleCalculate}
                 disabled={selectedComputations.length === 0 || isCalculating}
-              >
+                >
                 {isCalculating ? 'Calculating...' : 'Calculate Selected'}
               </button>
 
@@ -507,6 +605,11 @@ function App() {
                   <p className="results-note">
                     These values are simulated and for demonstration purposes only. Actual computations would involve complex image processing.
                   </p>
+                  {Object.keys(computationResults).length > 0 && (
+                    <button onClick={handleExportToCSV} className="export-csv-button">
+                      Export Results to CSV
+                    </button>
+                  )}
                 </div>
               )}
             </div>
