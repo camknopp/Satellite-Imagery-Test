@@ -1,13 +1,13 @@
-from flask import Flask, request, jsonify, Response # Add Response
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import requests
 import json
 import logging
 from datetime import datetime, timedelta
-from rio_tiler.io import COGReader # Import COGReader
-from rio_tiler.errors import TileOutsideBounds # Import TileOutsideBounds
+from rio_tiler.io import COGReader 
+from rio_tiler.errors import TileOutsideBounds
 from rio_tiler.models import ImageData
-from urllib.parse import urlencode # Import urlencode
+from urllib.parse import urlencode
 
 app = Flask(__name__)
 CORS(app)
@@ -17,7 +17,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 STAC_API_URL = "https://earth-search.aws.element84.com/v1/search"
 
 # --- Helper function to fetch a single STAC feature ---
-# This function remains the same.
 def fetch_stac_feature(lat, lon, date_str, cloud_cover_lt=10, date_window_days=15):
     """
     Fetches the best STAC feature (image metadata) for a given point and date range.
